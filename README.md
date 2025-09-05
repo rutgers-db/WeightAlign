@@ -10,8 +10,7 @@ WeightAlign targets weighted Jaccard similarity and proposes efficient compact w
 - src/
   - builder/: builders (Abstract/AllAlign/Monotonic/SingleColumn)
   - Query.hpp, query_main.cpp: query engine and CLI entrypoint
-  - util/: hashing, TF/IDF, IO, compressed-window utilities
-- paper.pdf: the paper; LICENSE: MIT
+  - util/: hashing, TF/IDF, IO, compact window utilities
 
 ## Environment & Build
 - Requirements: C++17, CMake ≥ 3.16, GCC 9+/Clang 12+
@@ -28,26 +27,28 @@ WeightAlign targets weighted Jaccard similarity and proposes efficient compact w
 ### build (Index Building)
 
 ```
-Usage: build -f <data.bin> -i <index.data> -k <hash_count> [options]
+Usage: build -f <data.bin> -k <hash_count> [-i <index.data>] [options]
 
 Required:
   -f <file>     Binary document data file
-  -i <file>     Output index file path
   -k <num>      Number of hash functions
 
 Optional:
+  -i <file>         Output index file path (if not specified, won't save to disk)
   -n <num>          Limit number of documents (0=all)
   -l <num>          Document length limit (0=no limit)
-  -t <strategy>     TF weighting: raw, log, boolean, augmented, square
+  -t <strategy>     TF weighting: raw (default), log, boolean, augmented, square
   -I <file>         Load IDF weights from file (enables DOUBLE)
   -v <num>          Vocabulary size (default: 50257 for GPT-2)
-  -B <builder>      Builder: allalign (default), monotonic, single
+  -B <builder>      Builder: monotonic (default), allalign, single
   -a <0|1>          Monotonic active-key optimization (monotonic only; default 1)
   -s <binary|linear>Monotonic search strategy (monotonic only; default binary)
+  -V                Run in-memory validation after building (debug)
 
 Notes:
-- Type selection: INT only for raw and no IDF; otherwise DOUBLE (CWS hashing).
-- Unknown TF strategy values error out with a helpful message.
+- Only -f and -k are required; -i is optional (no save if omitted)
+- Type selection: INT for raw+no-IDF; DOUBLE for TF-strategies or IDF files
+- Default: raw TF weighting, monotonic builder, active=1, binary search
 ```
 
 ### query (Querying)
@@ -61,11 +62,6 @@ Required:
 
 Optional:
   -t <num>      Matching threshold 0.0-1.0 (default: 0.8)
-
-Examples:
-- Raw/INT, AllAlign: `./build/build -f sample/sample_docs.bin -i basic.data -k 16 -v 2000 -B allalign`
-- TF-IDF/DOUBLE, Monotonic binary active: `./build/build -f sample/sample_docs.bin -i tfidf.data -k 16 -v 2000 -I sample/sample_idf.txt -B monotonic -a 1 -s binary`
-- Query: `./build/query -i tfidf.data -f sample/query1.txt -t 0.6`
 ```
 
 ## Citation

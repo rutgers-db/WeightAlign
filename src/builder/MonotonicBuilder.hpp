@@ -95,6 +95,7 @@ private:
                       WeightType rhs_tf = calculateTF(rhs.second, max_freq);
                       auto lhsVal = hasher.eval(hid, lhs.first, lhs_tf);
                       auto rhsVal = hasher.eval(hid, rhs.first, rhs_tf);
+                      if (lhsVal == rhsVal) return lhs.second < rhs.second;
                       return lhsVal < rhsVal;
                   });
     }

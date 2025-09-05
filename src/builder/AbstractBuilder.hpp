@@ -107,22 +107,33 @@ public:
     }
 
     void validation() {
-        for (int hid = 0; hid < k; hid++) {
-            int n = docs[0].size();
-            for (int i = 0; i < n; i++) {
-                for (int j = i; j < n; j++) {
-                    int flag = 0;
-                    for (const auto& cw : cws[hid]) {
-                        if (cw.a <= i && i <= cw.b && cw.c <= j && j <= cw.d) {
-                            flag++;
+        for (int tid = 0; tid < docs.size(); tid++) {
+            int n = docs[tid].size();
+            for (int hid = 0; hid < k; hid++) {
+                for (int i = 0; i < n; i++) {
+                    for (int j = i; j < n; j++) {
+                        int flag = 0;
+                        for (const auto& cw : cws[hid]) {
+                            if (cw.T != tid) continue;
+                            if (cw.a <= i && i <= cw.b && cw.c <= j && j <= cw.d) {
+                                flag++;
+                            }
+                        }
+                        if (flag == 0) {
+                            cout << "uncovered : " << i << " " << j << endl;
+                        } else if (flag > 1) {
+                            cout << "multicover: " << i << " " << j << endl;
                         }
                     }
-                    if (flag == 0) {
-                        cout << "uncovered : " << i << " " << j << endl;
-                    } else if (flag > 1) {
-                        cout << "multicover: " << i << " " << j << endl;
-                    }
                 }
+            }
+        }
+    }
+
+    void display() {
+        for (int hid = 0; hid < k; hid++) {
+            for (auto cw: cws[hid]) {
+                cw.display();
             }
         }
     }
